@@ -76,7 +76,7 @@ void vtkVectorTemplate<T>::SetComponentArrays(
   this->YArray = y;
   this->ZArray = z;
   this->Deleter = deleter;
-  this->NumberOfComponents = (z != nullptr) ? 3 : 2;
+  this->NumberOfComponents = z ? 3 : y ? 2 : 1;
   this->Size = this->NumberOfComponents * numPoints;
   this->MaxId = this->Size - 1;
   this->TempDoubleArray = new double [this->NumberOfComponents];
@@ -198,8 +198,11 @@ template <class T>
 void vtkVectorTemplate<T>::GetTuple(vtkIdType i, double *tuple)
 {
   tuple[0] = static_cast<double>(this->XArray[i]);
-  tuple[1] = static_cast<double>(this->YArray[i]);
-  if (this->ZArray != nullptr)
+  if (this->YArray)
+    {
+    tuple[1] = static_cast<double>(this->YArray[i]);
+    }
+  if (this->ZArray)
     {
     tuple[2] = static_cast<double>(this->ZArray[i]);
     }

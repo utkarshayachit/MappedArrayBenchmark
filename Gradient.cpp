@@ -69,14 +69,10 @@ int main(int argc, char **argv)
 
   timer.EndEvent("Pointer");
 
-  // create vtk data structures and initialize them.
-  // note we are operating on a scalar so no need for mapped array
-  vtkFloatArray *vs = vtkFloatArray::New();
-  vs->SetNumberOfTuples(nxyz);
-
-  apply<float>(vs->GetPointer(0),
-    ext[0], ext[1], ext[2], ext[3], ext[4], ext[5],
-    nx, ny, nz, sinXSinY<float>);
+  // create vtk mapped data array and a vector for the result
+  // and initialize them.
+  vtkVectorTemplate<float> *vs = vtkVectorTemplate<float>::New();
+  vs->SetComponentArrays(s, nullptr, nullptr, nxyz);
 
   vtkFloatArray *vg = vtkFloatArray::New();
   vg->SetNumberOfComponents(3);
