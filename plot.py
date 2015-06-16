@@ -45,7 +45,7 @@ p_r = ax.bar(ids, ptr_t, w, color='r')
 m_r = ax.bar(ids+w, map_t, w, color='y')
 
 ax.set_ylabel('time (sec)', fontweight='bold')
-ax.set_title('Computation Times\nMapped Array vs Pointer', fontweight='bold')
+ax.set_title('Computation Times GCC 4.9.2\nMapped Array vs Pointer', fontweight='bold')
 ax.set_xticks(ids + w)
 ax.set_xticklabels( ('Magnitude', 'Gradient') , fontweight='bold')
 ax.legend((p_r, m_r), ('Pointer', 'Mapped Array'), loc=2 )
@@ -54,6 +54,5 @@ plt.xlim([ids[0]-w/2.0, ids[1]++2.0*w+w/2.0])
 
 print 'pointers are faster by'
 print map_t/ptr_t
-
 
 plt.show()
