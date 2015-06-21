@@ -1,5 +1,7 @@
 #include "vtkVectorTemplate.h"
 #include "vtkFloatArray.h"
+#include "vtkDataArrayIteratorMacro.h"
+#include "vtkArrayIteratorIncludes.h"
 
 #include "Timer.h"
 #include "Generators.h"
@@ -38,11 +40,13 @@ int main(int argc, char **argv)
   float *vx;
   float *vy;
   float *vz;
+  float *vxyz;
   float *vm;
   posix_memalign(reinterpret_cast<void**>(&vx), 32, nxyz*sizeof(float));
   posix_memalign(reinterpret_cast<void**>(&vy), 32, nxyz*sizeof(float));
   posix_memalign(reinterpret_cast<void**>(&vz), 32, nxyz*sizeof(float));
   posix_memalign(reinterpret_cast<void**>(&vm), 32, nxyz*sizeof(float));
+  posix_memalign(reinterpret_cast<void**>(&vxyz), 32, 3*nxyz*sizeof(float));
 
   // initialize them with something
   apply<float>(vx,
@@ -61,7 +65,18 @@ int main(int argc, char **argv)
   // compute magnitude using pointers
   timer.StartEvent();
   magnitude(vm, vx, vy, vz, nxyz);
-  timer.EndEvent("Pointer");
+  timer.EndEvent("3 Pointers");
+
+  for (size_t cc=0; cc < nxyz; cc++)
+    {
+    vxyz[3*cc + 0] = vx[cc];
+    vxyz[3*cc + 1] = vy[cc];
+    vxyz[3*cc + 2] = vz[cc];
+    }
+
+  timer.StartEvent();
+  magnitude(vm, vxyz, nxyz);
+  timer.EndEvent("1 Pointer");
 
   // create the mapped array and vtk data structures
   // and initialize them
@@ -77,9 +92,47 @@ int main(int argc, char **argv)
   magnitude(vecMag, vec, nxyz);
   timer.EndEvent("MappedArray");
 
+  timer.StartEvent();
+  switch (vec->GetDataType())
+    {
+    vtkDataArrayIteratorMacro(vec,
+      magnitude(vecMag, vtkDABegin, nxyz, vtkDAValueType()));
+    }
+  timer.EndEvent("MappedArray Fixed");
+
+  vtkFloatArray* vec3 = vtkFloatArray::New();
+  vec3->SetNumberOfComponents(3);
+  vec3->SetNumberOfTuples(nxyz);
+  for (size_t cc=0; cc < nxyz; cc++)
+    {
+    vec3->SetValue(3*cc, vx[cc]);
+    vec3->SetValue(3*cc+1, vy[cc]);
+    vec3->SetValue(3*cc+2, vz[cc]);
+    }
+
+  timer.StartEvent();
+  switch (vec3->GetDataType())
+    {
+    vtkDataArrayIteratorMacro(vec3,
+      magnitude(vecMag, vtkDABegin, nxyz, vtkDAValueType()));
+    }
+  timer.EndEvent("Typed Array Simulated");
+
+
+  timer.StartEvent();
+  vtkArrayIterator* iter = vec3->NewIterator();
+  switch (vec3->GetDataType())
+    {
+    vtkArrayIteratorTemplateMacro(
+      magnitude(vecMag, static_cast<VTK_TT*>(iter)));
+    }
+  iter->Delete();
+  timer.EndEvent("Using vtkArrayIterator");
+
   // print the report
   cerr << "Magnitude " << n << endl
     << timer << endl << endl;
+
 
   // dump arrays for validation
 #if defined(DUMP_ARRAYS)

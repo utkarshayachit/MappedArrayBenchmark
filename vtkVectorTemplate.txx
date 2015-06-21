@@ -238,21 +238,22 @@ T vtkVectorTemplate<T>::GetValue(vtkIdType idx)
 template <class T>
 T& vtkVectorTemplate<T>::GetValueReference(vtkIdType idx)
 {
-  const vtkIdType tuple = idx / this->NumberOfComponents;
-  const vtkIdType comp = idx % this->NumberOfComponents;
-  switch (comp)
-    {
-    case 0:
-      return this->XArray[tuple];
-    case 1:
-      return this->YArray[tuple];
-    case 2:
-      return this->ZArray[tuple];
-    default:
-      vtkErrorMacro(<< "Invalid number of components.");
-      static T dummy(0);
-      return dummy;
-    }
+  return this->XArray[idx/3];
+  //const vtkIdType tuple = idx / this->NumberOfComponents;
+  //const vtkIdType comp = idx % this->NumberOfComponents;
+  //switch (comp)
+  //  {
+  //  case 0:
+  //    return this->XArray[tuple];
+  //  case 1:
+  //    return this->YArray[tuple];
+  //  case 2:
+  //    return this->ZArray[tuple];
+  //  default:
+  //    vtkErrorMacro(<< "Invalid number of components.");
+  //    static T dummy(0);
+  //    return dummy;
+  //  }
 }
 
 //------------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 #ifndef Math_h
 #define Math_h
 
+#include "vtkArrayIteratorTemplate.h"
 // --------------------------------------------------------------------------
 template <typename T>
 void magnitude(
@@ -43,8 +44,34 @@ void magnitude(vtkDataArray *m, vtkDataArray *v, size_t n)
     }
 }
 
+// --------------------------------------------------------------------------
+template <typename OutputArray, typename Iterator, typename ElementType>
+void magnitude(OutputArray* m, Iterator v, size_t n, const ElementType&)
+{
+  for (size_t i = 0; i < n; ++i)
+    {
+    ElementType vv = v[3*i]*v[3*i] + v[3*i+1]*v[3*i+1] + v[3*i+2]*v[3*i+2];
+    m->SetValue(i, sqrt(vv));
+    }
+}
 
-
+// --------------------------------------------------------------------------
+template <typename OutputArray, typename Iterator>
+void magnitude(OutputArray* m, Iterator* iter)
+{
+  for (size_t cc=0, max = iter->GetNumberOfTuples(); cc < max; cc++)
+    {
+    float v =
+      iter->GetValue(3*cc) * iter->GetValue(3*cc) +
+      iter->GetValue(3*cc+1) * iter->GetValue(3*cc+1) +
+      iter->GetValue(3*cc+2) * iter->GetValue(3*cc+2);
+    m->SetValue(cc, sqrt(v));
+    }
+}
+template <typename OutputArray>
+void magnitude(OutputArray* m, vtkArrayIteratorTemplate<vtkStdString>* iter)
+{
+}
 
 // --------------------------------------------------------------------------
 template <typename T>
