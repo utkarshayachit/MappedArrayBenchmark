@@ -7,6 +7,7 @@
 #include "Generators.h"
 #include "Math.h"
 #include "Io.h"
+#include "Array.h"
 
 #include <fstream>
 #include <iostream>
@@ -118,7 +119,6 @@ int main(int argc, char **argv)
     }
   timer.EndEvent("Typed Array Simulated");
 
-
   timer.StartEvent();
   vtkArrayIterator* iter = vec3->NewIterator();
   switch (vec3->GetDataType())
@@ -128,6 +128,24 @@ int main(int argc, char **argv)
     }
   iter->Delete();
   timer.EndEvent("Using vtkArrayIterator");
+
+
+  vtkStructureOfArrays<float> soaXYZ;
+  soaXYZ.SetArray(0, vx);
+  soaXYZ.SetArray(1, vy);
+  soaXYZ.SetArray(2, vz);
+  soaXYZ.SetNumberOfTuples(nxyz);
+  timer.StartEvent();
+  magnitude(vm, soaXYZ.begin(), soaXYZ.end());
+  timer.EndEvent("Using vtkStructureOfArrays");
+
+  vtkStructureOfArrays<const float> soaXYZConst;
+  soaXYZConst.SetArray(0, vx);
+  soaXYZConst.SetArray(1, vy);
+  soaXYZConst.SetArray(2, vz);
+  soaXYZConst.SetNumberOfTuples(nxyz);
+
+  //cout << *soaXYZ << *soaXYZConst;
 
   // print the report
   cerr << "Magnitude " << n << endl

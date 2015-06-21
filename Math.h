@@ -69,8 +69,19 @@ void magnitude(OutputArray* m, Iterator* iter)
     }
 }
 template <typename OutputArray>
-void magnitude(OutputArray* m, vtkArrayIteratorTemplate<vtkStdString>* iter)
+void magnitude(OutputArray*, vtkArrayIteratorTemplate<vtkStdString>*)
 {
+}
+
+// --------------------------------------------------------------------------
+template <typename OutputArray, typename Iterator>
+void magnitude(OutputArray* m, Iterator begin, Iterator end)
+{
+  for (; ! (begin == end); ++begin)
+    {
+    m[begin.index()] = sqrt(
+      begin[0]*begin[0] + begin[1]*begin[1] + begin[2]*begin[2]);
+    }
 }
 
 // --------------------------------------------------------------------------
