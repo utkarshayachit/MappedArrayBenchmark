@@ -154,10 +154,12 @@ int main(int argc, char **argv)
   aa1.SetArray(1, vy);
   aa1.SetArray(2, vz);
 
-  ComputeMagnitude<float> cm(vm);
+  vtkSOAAgnosticArray<float, 1> output;
+  output.SetNumberOfTuples(nxyz);
+  output.SetArray(0, vm);
 
   timer.StartEvent();
-  Dispatch(aa1, cm);
+  magnitude(output.Begin(), aa1.Begin(), aa1.End());
   timer.EndEvent("Using vtkAgnosticArrays");
 
   //vtkSOAAgnosticArray<const float, 2> aa2;

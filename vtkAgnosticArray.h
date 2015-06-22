@@ -20,18 +20,13 @@
 
 #include "vtkTuple.h"
 
-class vtkAgnosticArrayInputIteratorCategory{};
-
-template <class CategoryT>
 class vtkAgnosticArray
 {
 public:
-  typedef CategoryT Category;
   virtual ~vtkAgnosticArray()
     {
     }
 };
-
 
 template <class ArrayTypeT>
 class vtkAgnosticArrayInputIterator
@@ -58,11 +53,11 @@ public:
   inline void operator++(int) { this->Index++; }
   inline bool operator==(const SelfType& other) const
     {
-    return (&this->AssociatedArray == &other.AssociatedArray) && (this->Index == other.Index);
+    return (this->Index == other.Index);
     }
   inline bool operator!=(const SelfType& other) const
     {
-    return (&this->AssociatedArray != &other.AssociatedArray) || (this->Index != other.Index);
+    return (this->Index != other.Index);
     }
   inline ScalarReturnType operator[](int component) const
     {
@@ -73,27 +68,14 @@ private:
   IndexType Index;
 };
 
-template <class ArrayTypeT, class Functor>
-void Dispatch(ArrayTypeT& array, Functor& f, const vtkAgnosticArrayInputIteratorCategory&)
-{
-  vtkAgnosticArrayInputIterator<ArrayTypeT> begin(array);
-  vtkAgnosticArrayInputIterator<ArrayTypeT> end(array, array.GetNumberOfTuples());
-  f(begin, end);
-}
-
-template <class ArrayTypeT, class Functor>
-void Dispatch(ArrayTypeT& array, Functor& f)
-{
-  Dispatch(array, f, typename ArrayTypeT::Category());
-}
-
 template <class ScalarTypeT, int NumberOfComponents=3>
-class vtkSOAAgnosticArray : public vtkAgnosticArray<vtkAgnosticArrayInputIteratorCategory>
+class vtkSOAAgnosticArray : public vtkAgnosticArray
 {
 public:
-  typedef vtkAgnosticArrayInputIteratorCategory Category;
+  typedef vtkSOAAgnosticArray<ScalarTypeT, NumberOfComponents> SelfType;
   typedef ScalarTypeT ScalarType;
   typedef ScalarTypeT& ScalarReturnType;
+  typedef vtkAgnosticArrayInputIterator<SelfType> IteratorType;
 
   vtkSOAAgnosticArray()
     {
@@ -111,6 +93,13 @@ public:
     this->Data[compno] = data;
     }
 
+  IteratorType Begin() const
+    { return IteratorType(*this, 0); }
+  IteratorType End() const
+    { return IteratorType(*this, this->NumberOfTuples); }
+  IteratorType Iter(vtkIdType index) const
+    { return IteratorType(*this, index); }
+
   void SetNumberOfTuples(vtkIdType numTuples) { this->NumberOfTuples = numTuples; }
   vtkIdType GetNumberOfTuples() const { return this->NumberOfTuples; }
 
@@ -118,7 +107,6 @@ public:
     {
     return this->Data[component][index];
     }
-
 protected:
   ScalarType* Data[NumberOfComponents];
   vtkIdType NumberOfTuples;

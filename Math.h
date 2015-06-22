@@ -84,26 +84,15 @@ void magnitude(OutputArray* m, Iterator begin, Iterator end)
     }
 }
 
-template <typename OutputArray>
-class ComputeMagnitude
+// --------------------------------------------------------------------------
+template <typename OutputIteratorType, typename InputIteratorType>
+inline void magnitude(OutputIteratorType out, InputIteratorType begin, InputIteratorType end)
 {
-  OutputArray* Result;
-public:
-  ComputeMagnitude(OutputArray* result) : Result(result)
-  {
-  }
-  template <class Iterator>
-  inline void operator()(Iterator& begin, Iterator& end)
+  for (; begin != end; begin++, out++)
     {
-    for (; begin != end; begin++)
-      {
-      typedef typename Iterator::ArrayType ArrayType;
-      typedef typename ArrayType::ScalarType ScalarType;
-      this->Result[begin.GetIndex()] = sqrt(
-        begin[0]*begin[0] + begin[1]*begin[1] + begin[2]*begin[2]);
-      }
+    out[0] = sqrt(begin[0]*begin[0] + begin[1]*begin[1] + begin[2]*begin[2]);
     }
-};
+}
 
 // --------------------------------------------------------------------------
 template <typename T>
