@@ -8,7 +8,7 @@
 #include "Math.h"
 #include "Io.h"
 #include "Array.h"
-
+#include "vtkAgnosticArray.h"
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
@@ -144,7 +144,23 @@ int main(int argc, char **argv)
   soaXYZConst.SetArray(1, vy);
   soaXYZConst.SetArray(2, vz);
   soaXYZConst.SetNumberOfTuples(nxyz);
+  timer.StartEvent();
+  magnitude(vm, soaXYZ.begin(), soaXYZ.end());
+  timer.EndEvent("Using vtkStructureOfArrays (const)");
 
+  vtkSOAAgnosticArray<const float, 3> aa1;
+  aa1.SetNumberOfTuples(nxyz);
+  aa1.SetArray(0, vx);
+  aa1.SetArray(1, vy);
+  aa1.SetArray(2, vz);
+
+  ComputeMagnitude<float> cm(vm);
+
+  timer.StartEvent();
+  Dispatch(aa1, cm);
+  timer.EndEvent("Using vtkAgnosticArrays");
+
+  //vtkSOAAgnosticArray<const float, 2> aa2;
   //cout << *soaXYZ << *soaXYZConst;
 
   // print the report
