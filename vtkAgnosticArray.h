@@ -97,7 +97,7 @@ public:
     { return IteratorType(*this, 0); }
   IteratorType End() const
     { return IteratorType(*this, this->NumberOfTuples); }
-  IteratorType Iter(vtkIdType index) const
+  IteratorType Iter(vtkIdType index=0) const
     { return IteratorType(*this, index); }
 
   void SetNumberOfTuples(vtkIdType numTuples) { this->NumberOfTuples = numTuples; }
@@ -111,5 +111,39 @@ protected:
   ScalarType* Data[NumberOfComponents];
   vtkIdType NumberOfTuples;
 };
+
+
+#include <typeinfo>
+#define vtkAgnosticArrayMacro(array, call) \
+  if (typeid(array) == typeid(vtkSOAAgnosticArray<float, 1>)) \
+    { \
+    typedef vtkSOAAgnosticArray<float, 1> ARRAY_TYPE; \
+    ARRAY_TYPE& ARRAY = reinterpret_cast<ARRAY_TYPE&>(array); \
+    call ; \
+    } \
+  else if (typeid(array) == typeid(vtkSOAAgnosticArray<float, 2>)) \
+    { \
+    typedef vtkSOAAgnosticArray<float, 2> ARRAY_TYPE; \
+    ARRAY_TYPE& ARRAY = reinterpret_cast<ARRAY_TYPE&>(array); \
+    call ; \
+    } \
+  else if (typeid(array) == typeid(vtkSOAAgnosticArray<float, 3>)) \
+    { \
+    typedef vtkSOAAgnosticArray<float, 3> ARRAY_TYPE; \
+    ARRAY_TYPE& ARRAY = reinterpret_cast<ARRAY_TYPE&>(array); \
+    call ; \
+    }
+
+#define vtkAgnosticArrayMacro2(array1, array2, callOriginal) \
+  vtkAgnosticArrayMacro(array1, \
+    typedef ARRAY_TYPE ARRAY_TYPE1; \
+    ARRAY_TYPE& ARRAY1 = ARRAY; \
+    vtkAgnosticArrayMacro(array2, \
+      typedef ARRAY_TYPE ARRAY_TYPE2; \
+      ARRAY_TYPE& ARRAY2 = ARRAY; \
+      callOriginal \
+    )\
+  )
+
 
 #endif

@@ -18,6 +18,14 @@ using std::ofstream;
 using std::cerr;
 using std::endl;
 
+
+template <class OutputArrayType>
+void magnitude(OutputArrayType& out, vtkAgnosticArray& in)
+{
+  vtkAgnosticArrayMacro(in,
+    magnitude(out.Iter(), ARRAY.Begin(), ARRAY.End()));
+}
+
 // ---------------------------------------------------------------------------
 int main(int argc, char **argv)
 {
@@ -148,7 +156,7 @@ int main(int argc, char **argv)
   magnitude(vm, soaXYZ.begin(), soaXYZ.end());
   timer.EndEvent("Using vtkStructureOfArrays (const)");
 
-  vtkSOAAgnosticArray<const float, 3> aa1;
+  vtkSOAAgnosticArray<float, 3> aa1;
   aa1.SetNumberOfTuples(nxyz);
   aa1.SetArray(0, vx);
   aa1.SetArray(1, vy);
@@ -161,6 +169,10 @@ int main(int argc, char **argv)
   timer.StartEvent();
   magnitude(output.Begin(), aa1.Begin(), aa1.End());
   timer.EndEvent("Using vtkAgnosticArrays");
+
+  timer.StartEvent();
+  vtkAgnosticArrayMacro2(output, aa1, magnitude(ARRAY1, ARRAY2));
+  timer.EndEvent("Using vtkAgnosticArrays via Macro");
 
   //vtkSOAAgnosticArray<const float, 2> aa2;
   //cout << *soaXYZ << *soaXYZConst;
