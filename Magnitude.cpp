@@ -23,7 +23,7 @@ template <class OutputArrayType>
 void magnitude(OutputArrayType& out, vtkAgnosticArray& in)
 {
   vtkAgnosticArrayMacro(in,
-    magnitude(out.Iter(), ARRAY.Begin(), ARRAY.End()));
+    magnitude(out.Begin(), ARRAY.Begin(), ARRAY.End()));
 }
 
 // ---------------------------------------------------------------------------
@@ -156,13 +156,13 @@ int main(int argc, char **argv)
   magnitude(vm, soaXYZ.begin(), soaXYZ.end());
   timer.EndEvent("Using vtkStructureOfArrays (const)");
 
-  vtkSOAAgnosticArray<float, 3> aa1;
+  vtkSOAAgnosticArray<float> aa1;
   aa1.SetNumberOfTuples(nxyz);
   aa1.SetArray(0, vx);
   aa1.SetArray(1, vy);
   aa1.SetArray(2, vz);
 
-  vtkSOAAgnosticArray<float, 1> output;
+  vtkSOAAgnosticArray<float> output;
   output.SetNumberOfTuples(nxyz);
   output.SetArray(0, vm);
 
