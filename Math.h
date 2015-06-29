@@ -56,6 +56,7 @@ void magnitude(OutputArray* m, Iterator v, size_t n, const ElementType&)
 }
 
 // --------------------------------------------------------------------------
+// Overload for using vtkArrayIterator.
 template <typename OutputArray, typename Iterator>
 void magnitude(OutputArray* m, Iterator* iter)
 {
@@ -85,6 +86,7 @@ void magnitude(OutputArray* m, Iterator begin, Iterator end)
 }
 
 // --------------------------------------------------------------------------
+// Overload for using vtkGenericDataArray/vtkSoADataArrayTemplate.
 template <typename OutputIteratorType, typename InputIteratorType>
 inline void magnitude(OutputIteratorType out, InputIteratorType begin, InputIteratorType end)
 {

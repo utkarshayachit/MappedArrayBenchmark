@@ -2,13 +2,13 @@
 #include "vtkFloatArray.h"
 #include "vtkDataArrayIteratorMacro.h"
 #include "vtkArrayIteratorIncludes.h"
+#include "vtkSoADataArrayTemplate.h"
+#include "vtkNew.h"
 
 #include "Timer.h"
 #include "Generators.h"
 #include "Math.h"
 #include "Io.h"
-#include "Array.h"
-#include "vtkAgnosticArray.h"
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
@@ -17,14 +17,6 @@
 using std::ofstream;
 using std::cerr;
 using std::endl;
-
-
-template <class OutputArrayType>
-void magnitude(OutputArrayType& out, vtkAgnosticArray& in)
-{
-  vtkAgnosticArrayMacro(in,
-    magnitude(out.Begin(), ARRAY.Begin(), ARRAY.End()));
-}
 
 // ---------------------------------------------------------------------------
 int main(int argc, char **argv)
@@ -137,48 +129,34 @@ int main(int argc, char **argv)
   iter->Delete();
   timer.EndEvent("Using vtkArrayIterator");
 
-
-  vtkStructureOfArrays<float> soaXYZ;
-  soaXYZ.SetArray(0, vx);
-  soaXYZ.SetArray(1, vy);
-  soaXYZ.SetArray(2, vz);
-  soaXYZ.SetNumberOfTuples(nxyz);
-  timer.StartEvent();
-  magnitude(vm, soaXYZ.begin(), soaXYZ.end());
-  timer.EndEvent("Using vtkStructureOfArrays");
-
-  vtkStructureOfArrays<const float> soaXYZConst;
-  soaXYZConst.SetArray(0, vx);
-  soaXYZConst.SetArray(1, vy);
-  soaXYZConst.SetArray(2, vz);
-  soaXYZConst.SetNumberOfTuples(nxyz);
-  timer.StartEvent();
-  magnitude(vm, soaXYZ.begin(), soaXYZ.end());
-  timer.EndEvent("Using vtkStructureOfArrays (const)");
-
-  vtkSOAAgnosticArray<float> aa1;
-  aa1.SetNumberOfTuples(nxyz);
-  aa1.SetArray(0, vx);
-  aa1.SetArray(1, vy);
-  aa1.SetArray(2, vz);
-
-  vtkSOAAgnosticArray<float> output;
-  output.SetNumberOfTuples(nxyz);
-  output.SetArray(0, vm);
+  vtkNew<vtkSoADataArrayTemplate<float> > aa1;
+  aa1->SetResizeable(false);
+  aa1->SetNumberOfComponents(3);
+  aa1->SetArray(0, vx, nxyz, true);
+  aa1->SetArray(1, vy, nxyz, true);
+  aa1->SetArray(2, vz, nxyz, true);
+  aa1->SetNumberOfTuples(nxyz);
+  vtkNew<vtkSoADataArrayTemplate<float> > output;
+  output->SetResizeable(false);
+  output->SetNumberOfComponents(1);
+  output->SetArray(0, vm, nxyz, true);
+  output->SetNumberOfTuples(nxyz);
 
   timer.StartEvent();
-  magnitude(output.Begin(), aa1.Begin(), aa1.End());
-  timer.EndEvent("Using vtkAgnosticArrays");
+  magnitude(output->Begin(), aa1->Begin(), aa1->End());
+  timer.EndEvent("Using vtkSoADataArrayTemplate");
 
   timer.StartEvent();
-  vtkAgnosticArrayMacro2(output, aa1, magnitude(ARRAY1, ARRAY2));
-  timer.EndEvent("Using vtkAgnosticArrays via Macro");
+  vtkGenericDataArrayMacro2(aa1.GetPointer(), output.GetPointer(),
+    magnitude(OUT_ARRAY->Begin(), IN_ARRAY->Begin(), IN_ARRAY->End()));
+  timer.EndEvent("Using vtkSoADataArrayTemplate (via vtkGenericDataArrayMacro2)");
 
-  //vtkSOAAgnosticArray<const float, 2> aa2;
+
+  //vtkSoADataArrayTemplate<const float, 2> aa2;
   //cout << *soaXYZ << *soaXYZConst;
 
   // print the report
-  cerr << "Magnitude " << n << endl
+  cerr << "Magnitude " << nxyz << endl
     << timer << endl << endl;
 
 
